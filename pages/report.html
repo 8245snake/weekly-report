@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/editer.css">
+    <title>週報WEB</title>
+</head>
+
+<body>
+    <!-- ヘッダ -->
+    <div class="header">
+        週報システム
+    </div>
+    <!-- 本体 -->
+    <form action="/submit" method="post">
+        <div class="container">
+            <div class="inner-left"></div>
+            <div class="inner-center">
+                <div class="title">
+                    結果：
+                    <textarea name="result-txt" id="" cols="30" rows="100"   class="report-text" >
+{{.Title}}
+
+ {{.Tasks}}
+                    </textarea>
+                </div>
+            </div>
+            <div class="inner-right"></div>
+        </div>
+
+    </form>
+</body>
+
+</html>

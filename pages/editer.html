@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/editer.css">
+    <title>週報WEB</title>
+</head>
+
+<body>
+    <!-- ヘッダ -->
+    <div class="header">
+        週報システム
+    </div>
+    <!-- 本体 -->
+    <form action="/submit" method="post">
+        <div class="container">
+            <div class="inner-left"></div>
+            <div class="inner-center">
+                <div class="title">
+                    タイトル：
+                    <input type="text" name="title" placeholder="タイトル" class="title-text" value="{{.Title}}">
+                </div>
+                <!-- 先週の実績 -->
+                <div class="wrapper-jisseki">
+                    <div class="section-title">
+                        <h1>実績入力</h1>
+                    </div>
+                    <!-- 1行目 -->
+                    <div class="container-jisseki">
+                        {{template "daily-item" .Jisseki.Mon}}
+                        {{template "daily-item" .Jisseki.Tue}}
+                        {{template "daily-item" .Jisseki.Wed}}
+                    </div>
+                    <!-- 2行目 -->
+                    <div class="container-jisseki">
+                        {{template "daily-item" .Jisseki.Thu}}
+                        {{template "daily-item" .Jisseki.Fri}}
+                        {{template "daily-item" .Jisseki.Sat}}
+                        {{template "daily-item" .Jisseki.Sun}}
+                    </div>
+                </div>
+                <!-- 予定 -->
+                <div class="wrapper-yotei">
+                    <div class="section-title">
+                        <h1>予定入力</h1>
+                    </div>
+                    <!-- 1行目 -->
+                    <div class="container-yotei">
+                        {{template "daily-item" .Yotei.Mon}}
+                        {{template "daily-item" .Yotei.Tue}}
+                        {{template "daily-item" .Yotei.Wed}}
+                    </div>
+                    <!-- 2行目 -->
+                    <div class="container-yotei">
+                        {{template "daily-item" .Yotei.Thu}}
+                        {{template "daily-item" .Yotei.Fri}}
+                        {{template "daily-item" .Yotei.Sat}}
+                        {{template "daily-item" .Yotei.Sun}}
+                    </div>
+                    <!-- 近日中の予定など -->
+                    <div class="section-title">
+                        <h1>タスク</h1>
+                    </div>
+                    <div class="yotei-etc">
+                        <div class="yotei-task">
+                            <h2>日程に紐付かない予定</h2>
+                            <textarea name="tasks"  cols="30" rows="10" placeholder="適宜やるタスクを記入する"
+                                class="multi-text">{{.Tasks}}</textarea>
+                        </div>
+                        <div class="yotei-task">
+                            <h2>近日中の予定</h2>
+                            <textarea name="schedule"  cols="30" rows="10" placeholder="すでに分かっている日程があれば書く"
+                                class="multi-text">{{.Schedule}}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="inner-right"></div>
+        </div>
+        <!-- フッタ -->
+        <div class="footer">
+            <div class="button-box">
+                <input type="submit" value="確定" class="button">
+            </div>
+        </div>
+    </form>
+</body>
+
+</html>

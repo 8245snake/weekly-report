@@ -1,0 +1,19 @@
+{{define "daily-item"}}
+<div class="{{.Style}}">
+    <input name="{{.Prefix}}date" type="date" value="{{.DateValue}}"/>
+    <div class="check-holyday">
+        勤務日
+        <div>
+            {{if .IsHolyday}}
+            <input type="checkbox" id="{{.Prefix}}chk" name="{{.Prefix}}chk" value="{{.Prefix}}checked" checked="checked"/>
+            {{ else }}
+            <input type="checkbox" id="{{.Prefix}}chk" name="{{.Prefix}}chk"  value="{{.Prefix}}checked"/>
+            {{ end }}
+            <label for="{{.Prefix}}chk"></label>
+        </div>
+        休日
+    </div>
+    <input type="text" name="{{.Prefix}}subtxt" placeholder="社内、出張、休日 など" class="single-text" value="{{.SubText}}">
+    <textarea name="{{.Prefix}}txt" id="" cols="30" rows="10"  placeholder="{{.Placeholder}}" class="multi-text" >{{.Text}}</textarea>
+</div>
+{{end}}
