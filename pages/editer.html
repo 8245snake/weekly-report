@@ -3,38 +3,44 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="../static/css/editer.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/bootstrap4-toggle.min.css">
+    <script type="text/javascript" src="../static/js/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="../static/js/bootstrap.bundle.js"></script>
+    <script type="text/javascript" src="../static/js/bootstrap4-toggle.min.js"></script>
     <title>週報WEB</title>
 </head>
 
 <body>
+    <script src="../static/js/wasm_exec.js"></script>
+    <script>
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("static/wasm/main.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+        });
+    </script>
+
     <!-- ヘッダ -->
-    <div class="header">
-        週報システム
-    </div>
+    <nav class="navbar fixed-top navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">週報システム</a>
+    </nav>
     <!-- 本体 -->
-    <form action="/submit" method="post">
-        <div class="container">
-            <div class="inner-left"></div>
-            <div class="inner-center">
-                <div class="title">
-                    タイトル：
-                    <input type="text" name="title" placeholder="タイトル" class="title-text" value="{{.Title}}">
-                </div>
+    <div class="jumbotron  px-lg-5">
+        <div class="container-fluid px-lg-5">
+            <div class="w-50 mb-3">
+                <h2>タイトル</h2>
+                <input type="text" id="title" class="form-control mb-2" value="{{.Title}}">
+            </div>
+
+            <div class="d-flex flex-column">
                 <!-- 先週の実績 -->
-                <div class="wrapper-jisseki">
-                    <div class="section-title">
-                        <h1>実績入力</h1>
-                    </div>
-                    <!-- 1行目 -->
-                    <div class="container-jisseki">
+                <div class="d-flex flex-column bg-light px-lg-5 mn-lg-5">
+                    <h1>実績入力</h1>
+                    <div class="row">
                         {{template "daily-item" .Jisseki.Mon}}
                         {{template "daily-item" .Jisseki.Tue}}
                         {{template "daily-item" .Jisseki.Wed}}
-                    </div>
-                    <!-- 2行目 -->
-                    <div class="container-jisseki">
                         {{template "daily-item" .Jisseki.Thu}}
                         {{template "daily-item" .Jisseki.Fri}}
                         {{template "daily-item" .Jisseki.Sat}}
@@ -42,50 +48,52 @@
                     </div>
                 </div>
                 <!-- 予定 -->
-                <div class="wrapper-yotei">
-                    <div class="section-title">
-                        <h1>予定入力</h1>
-                    </div>
-                    <!-- 1行目 -->
-                    <div class="container-yotei">
+                <div class="d-flex flex-column  bg-light px-lg-5 mn-lg-5">
+                    <h1>予定入力</h1>
+                    <div class="row">
                         {{template "daily-item" .Yotei.Mon}}
                         {{template "daily-item" .Yotei.Tue}}
                         {{template "daily-item" .Yotei.Wed}}
-                    </div>
-                    <!-- 2行目 -->
-                    <div class="container-yotei">
                         {{template "daily-item" .Yotei.Thu}}
                         {{template "daily-item" .Yotei.Fri}}
                         {{template "daily-item" .Yotei.Sat}}
                         {{template "daily-item" .Yotei.Sun}}
                     </div>
-                    <!-- 近日中の予定など -->
                     <div class="section-title">
                         <h1>タスク</h1>
                     </div>
-                    <div class="yotei-etc">
-                        <div class="yotei-task">
-                            <h2>日程に紐付かない予定</h2>
-                            <textarea name="tasks"  cols="30" rows="10" placeholder="適宜やるタスクを記入する"
-                                class="multi-text">{{.Tasks}}</textarea>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card text-white bg-dark">
+                                <div class="card-header d-inline-flex justify-content-between">
+                                    日程に紐付かない予定・適宜やること
+                                </div>
+                                <textarea id="tasks" class="form-control" rows="10" placeholder="">{{.Tasks}}</textarea>
+                            </div>
                         </div>
-                        <div class="yotei-task">
-                            <h2>近日中の予定</h2>
-                            <textarea name="schedule"  cols="30" rows="10" placeholder="すでに分かっている日程があれば書く"
-                                class="multi-text">{{.Schedule}}</textarea>
+                        <div class="col-lg-6">
+                            <div class="card text-white bg-dark">
+                                <div class="card-header d-inline-flex justify-content-between">
+                                    近日中の予定
+                                </div>
+                                <textarea id="schedule" class="form-control" rows="10"
+                                    placeholder="">{{.Schedule}}</textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="inner-right"></div>
         </div>
-        <!-- フッタ -->
-        <div class="footer">
-            <div class="button-box">
-                <input type="submit" value="確定" class="button">
-            </div>
-        </div>
-    </form>
+    </div>
+    <nav class="navbar fixed-bottom navbar-dark bg-dark justify-content-end">
+        <button type="button" onclick="savePage();" class="btn btn-secondary" style="margin-right: 10px;">保存</button>
+        <form action="report">
+            <!-- 開始日を格納しておく -->
+            <input type="hidden" name="start" value="{{.Jisseki.Mon.DateValue}}">
+            <!-- ページ遷移するためsubmit -->
+            <button type="submit"  onclick="savePage();" class="btn btn-primary">保存して週報作成</button>
+        </form>
+    </nav>
 </body>
 
 </html>

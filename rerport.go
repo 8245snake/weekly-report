@@ -46,6 +46,7 @@ type DailyItem struct {
 	Prefix      string      `json:"prefix,omitempty"`
 	Style       string      `json:"style,omitempty"`
 	DateValue   string      `json:"date"`
+	DispDate    string      `json:"disp_date,omitempty"`
 	Placeholder string      `json:"placeholder,omitempty"`
 	Text        string      `json:"text"`
 	SubText     string      `json:"subtext"`
@@ -53,6 +54,10 @@ type DailyItem struct {
 
 //Weeks 週の名前
 var Weeks = [7]string{"sun", "mon", "tue", "wed", "thu", "fri", "sat"}
+
+//WeeksJP 週の名前
+// var WeeksJP = [7]string{"（日）", "（月）", "（火）", "（水）", "（木）", "（金）", "（土）"}
+var WeeksJP = [7]string{"(日)", "(月)", "(火)", "(水)", "(木)", "(金)", "(土)"}
 
 //NewReportData 初期化
 func NewReportData() ReportData {
@@ -116,6 +121,7 @@ func NewDailyItemJisseki(date time.Time) *DailyItem {
 		Style:       cssClass,
 		Placeholder: placeholder,
 		DateValue:   dateValue,
+		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
 		IsHolyday:   false,
 	}
 }
@@ -134,6 +140,7 @@ func NewDailyItemJissekiHolyday(date time.Time) *DailyItem {
 		Style:       cssClass,
 		Placeholder: placeholder,
 		DateValue:   dateValue,
+		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
 		IsHolyday:   true,
 	}
 }
@@ -152,6 +159,7 @@ func NewDailyItemYotei(date time.Time) *DailyItem {
 		Style:       cssClass,
 		Placeholder: placeholder,
 		DateValue:   dateValue,
+		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
 		IsHolyday:   false,
 	}
 }
@@ -170,6 +178,7 @@ func NewDailyItemYoteiHolyday(date time.Time) *DailyItem {
 		Style:       cssClass,
 		Placeholder: placeholder,
 		DateValue:   dateValue,
+		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
 		IsHolyday:   true,
 	}
 }
@@ -224,6 +233,7 @@ func (item *DailyItem) CompleteOmitedParam() {
 	item.Placeholder = dailyItem.Placeholder
 	item.Prefix = dailyItem.Prefix
 	item.Style = dailyItem.Style
+	item.DispDate = dailyItem.DispDate
 }
 
 //CompleteOmitedParam 省略されたパラメータを復活

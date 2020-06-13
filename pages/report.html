@@ -3,34 +3,38 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="../static/css/editer.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/bootstrap4-toggle.min.css">
+    <script type="text/javascript" src="../static/js/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="../static/js/bootstrap.bundle.js"></script>
+    <script type="text/javascript" src="../static/js/bootstrap4-toggle.min.js"></script>
     <title>週報WEB</title>
 </head>
 
 <body>
+    <script src="../static/js/wasm_exec.js"></script>
+    <script>
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("static/wasm/main.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+        });
+    </script>
+
     <!-- ヘッダ -->
-    <div class="header">
-        週報システム
-    </div>
+    <nav class="navbar fixed-top navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">週報システム</a>
+    </nav>
     <!-- 本体 -->
-    <form action="/submit" method="post">
-        <div class="container">
-            <div class="inner-left"></div>
-            <div class="inner-center">
-                <div class="title">
-                    結果：
-                    <textarea name="result-txt" id="" cols="30" rows="100"   class="report-text" >
-{{.Title}}
-
- {{.Tasks}}
-                    </textarea>
-                </div>
+    <div class="jumbotron  px-lg-5">
+        <div class="container-fluid px-lg-5">
+            <div class="w-50 mb-3">
+                <h2>タイトル</h2>
+                <input type="text" id="title" class="form-control mb-2" value="{{.Title}}">
             </div>
-            <div class="inner-right"></div>
+            <textarea  class="form-control" rows="100">{{.Tasks}}</textarea> 
         </div>
-
-    </form>
+    </div>
 </body>
 
 </html>
