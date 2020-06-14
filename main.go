@@ -6,65 +6,75 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-	"time"
 )
 
+var tplIndex *template.Template
 var tplEditer *template.Template
 var tplReport *template.Template
 
 func init() {
-	//テンプレート読み込み
-	if t, err := template.ParseFiles("pages/editer.html", "pages/_daily-item.html"); err == nil {
+	//ホーム画面テンプレート
+	if t, err := template.ParseFiles(
+		"pages/index.html",
+		"pages/_head.html",
+		"pages/_navber.html",
+		"pages/_weekly-item.html",
+		"pages/_toast.html",
+		"pages/_report-text.html",
+	); err == nil {
+		tplIndex = t
+	} else {
+		log.Fatalf("template error: %v", err)
+	}
+	//編集画面テンプレート
+	if t, err := template.ParseFiles(
+		"pages/editer.html",
+		"pages/_head.html",
+		"pages/_navber.html",
+		"pages/_daily-item.html",
+		"pages/_toast.html",
+		"pages/_report-text.html",
+	); err == nil {
 		tplEditer = t
 	} else {
 		log.Fatalf("template error: %v", err)
 	}
-	if t, err := template.ParseFiles("pages/report.html"); err == nil {
+	//レポート画面テンプレート
+	if t, err := template.ParseFiles(
+		"pages/report.html",
+		"pages/_head.html",
+		"pages/_navber.html",
+		"pages/_daily-item.html",
+		"pages/_toast.html",
+		"pages/_report-text.html",
+	); err == nil {
 		tplReport = t
 	} else {
 		log.Fatalf("template error: %v", err)
 	}
 }
 
+//handleIndex トップ画面
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	summary := LoadSummary()
+	if err := tplIndex.Execute(w, summary); err != nil {
+		log.Printf("failed to execute template: %v", err)
+	}
+}
+
 //handleEdit 編集画面
 func handleEdit(w http.ResponseWriter, r *http.Request) {
-
 	//パラメータ解析
 	r.ParseForm()
 	form := r.Form
-
 	//レポートの開始日を決定
-	date := form.Get("start")
-	var start time.Time
-	if date != "" {
-		var err error
-		start, err = time.Parse("2006-01-02", date)
-		if err != nil {
-			return
-		}
-	} else {
-		//今日開いたなら今週の月曜が起点のはず
-		if n := int(time.Now().Weekday()); n == 0 {
-			//日曜の場合は特殊な計算
-			start = time.Now().AddDate(0, 0, -6)
-		} else {
-			start = time.Now().AddDate(0, 0, -n+1)
-		}
+	startdate := form.Get("start")
+	data, err := getReportData(startdate)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
 	}
-
-	//構造体を作る
-	var data ReportData
-	jsonpath := SearchJSON(start)
-	if jsonpath != "" {
-		//保存済みのJSONがあれば復元
-		if d, err := RestoreJSON(jsonpath); err == nil {
-			data = d
-			data.CompleteOmitedParam()
-		}
-	} else {
-		data = NewReportDataToday(start)
-	}
-
+	//レンダリング
 	if err := tplEditer.Execute(w, data); err != nil {
 		log.Printf("failed to execute template: %v", err)
 	}
@@ -89,39 +99,45 @@ func handleSave(w http.ResponseWriter, r *http.Request) {
 
 //handleViewReport レポート表示
 func handleViewReport(w http.ResponseWriter, r *http.Request) {
-
+	//パラメータ解析
 	r.ParseForm()
 	form := r.Form
-
-	start, err := time.Parse("2006-01-02", form.Get("start"))
+	//レポートの開始日を決定
+	startdate := form.Get("start")
+	report, err := getReportData(startdate)
 	if err != nil {
+		w.Write([]byte(err.Error()))
 		return
 	}
-	//構造体を作る
-	var report ReportData
-	jsonpath := SearchJSON(start)
-	if jsonpath != "" {
-		if d, err := RestoreJSON(jsonpath); err == nil {
-			report = d
-			report.CompleteOmitedParam()
-		} else {
-			return
-		}
-	} else {
-		return
-	}
-
 	if err := tplReport.Execute(w, report); err != nil {
 		log.Printf("failed to execute template: %v", err)
 	}
 }
 
+//responseReportData 開始日をキーにしてReportDataを返すAPI
+func responseReportData(w http.ResponseWriter, r *http.Request) {
+	//パラメータ解析
+	r.ParseForm()
+	form := r.Form
+	//レポートの開始日を決定
+	startdate := form.Get("start")
+	report, err := getReportData(startdate)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+	jsindata, _ := json.Marshal(report)
+	w.Write(jsindata)
+}
+
 func main() {
 	port := "3000"
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/edit", handleEdit)
 	http.HandleFunc("/save", handleSave)
 	http.HandleFunc("/report", handleViewReport)
+	http.HandleFunc("/api/report", responseReportData)
 	log.Printf("Server listening on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

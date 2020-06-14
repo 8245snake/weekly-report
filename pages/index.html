@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<!-- headタグ -->
+{{template "head"}}
+
+<body class="bg-light">
+    <!-- ヘッダ -->
+    {{template "navber"}}
+    <!-- 本体 -->
+    <div class="jumbotron px-lg-5 bg-light">
+        <div class="container-fluid px-lg-5">
+            <div class="row">
+                <!-- ナビゲーションリスト -->
+                <div class="col-lg-4">
+                    <h2 class="mt-5">週報一覧</h2>
+                    <div class="list-group" style="height: 500px; overflow-y: scroll;">
+                        {{ range $i, $item := .List -}}
+                            {{template "weekly-item" $item}}
+                        {{- end }}
+                    </div>
+                </div>
+                <!-- 閲覧画面 -->
+                <div class="col-lg-8">
+                    <h2>プレビュー</h2>
+                    <textarea id="preview" class="form-control" rows="25"></textarea>
+                    <form action="edit">
+                        <!-- 開始日を格納しておく -->
+                        <input type="hidden" name="start" id="start" value="">
+                        <!-- ページ遷移するためsubmit -->
+                        <button type="submit" class="btn btn-primary">編集</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

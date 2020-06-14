@@ -2,12 +2,13 @@
 
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func main() {
-	fmt.Println("aeouo")
-	data := NewReportData()
-	Save(data)
+
+	report := ReportData{}
+	fmt.Printf("%v\n", report)
+
+	dom := ApplyTemplate(tmplTest, "world")
+	fmt.Printf("%s\n", dom)
 }

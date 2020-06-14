@@ -1,11 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -21,11 +17,12 @@ const (
 
 //ReportData 週報データ全て
 type ReportData struct {
-	Jisseki  WeeklyContents `json:"jisseki"`
-	Yotei    WeeklyContents `json:"yotei"`
-	Title    string         `json:"title"`
-	Tasks    string         `json:"task"`
-	Schedule string         `json:"schedule"`
+	Jisseki    WeeklyContents `json:"jisseki"`
+	Yotei      WeeklyContents `json:"yotei"`
+	Title      string         `json:"title"`
+	Tasks      string         `json:"task"`
+	Schedule   string         `json:"schedule"`
+	LastUpdate string         `json:"last_update"`
 }
 
 //WeeklyContents 週毎のデータ
@@ -44,7 +41,6 @@ type DailyItem struct {
 	Type        ContentType `json:"type"`
 	IsHolyday   bool        `json:"is_holyday"`
 	Prefix      string      `json:"prefix,omitempty"`
-	Style       string      `json:"style,omitempty"`
 	DateValue   string      `json:"date"`
 	DispDate    string      `json:"disp_date,omitempty"`
 	Placeholder string      `json:"placeholder,omitempty"`
@@ -55,8 +51,7 @@ type DailyItem struct {
 //Weeks 週の名前
 var Weeks = [7]string{"sun", "mon", "tue", "wed", "thu", "fri", "sat"}
 
-//WeeksJP 週の名前
-// var WeeksJP = [7]string{"（日）", "（月）", "（火）", "（水）", "（木）", "（金）", "（土）"}
+//WeeksJP 週の名前（日本語）
 var WeeksJP = [7]string{"(日)", "(月)", "(火)", "(水)", "(木)", "(金)", "(土)"}
 
 //NewReportData 初期化
@@ -103,14 +98,15 @@ func NewReportDataToday(startDate time.Time) ReportData {
 		Sat: NewDailyItemYoteiHolyday(startDate.AddDate(0, 0, 12)),
 		Sun: NewDailyItemYoteiHolyday(startDate.AddDate(0, 0, 13)),
 	}
-	return ReportData{Jisseki: jisseki, Yotei: yotei}
+	layout := "2006/01/02"
+	title := fmt.Sprintf("【】%s～%s", startDate.Format(layout), startDate.AddDate(0, 0, 6).Format(layout))
+	return ReportData{Jisseki: jisseki, Yotei: yotei, Title: title}
 }
 
 //NewDailyItemJisseki 平日の実績
 func NewDailyItemJisseki(date time.Time) *DailyItem {
 	contentType := ContentTypeJisseki
 	placeholder := "実績を記入する"
-	cssClass := "jisseki-item-heijitsu"
 	dateValue := date.Format("2006-01-02")
 	week := Weeks[date.Weekday()]
 	prefix := fmt.Sprintf("%s-%s-", contentType, week)
@@ -118,7 +114,6 @@ func NewDailyItemJisseki(date time.Time) *DailyItem {
 	return &DailyItem{
 		Type:        contentType,
 		Prefix:      prefix,
-		Style:       cssClass,
 		Placeholder: placeholder,
 		DateValue:   dateValue,
 		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
@@ -130,14 +125,12 @@ func NewDailyItemJisseki(date time.Time) *DailyItem {
 func NewDailyItemJissekiHolyday(date time.Time) *DailyItem {
 	contentType := ContentTypeJisseki
 	placeholder := "実績を記入する"
-	cssClass := "jisseki-item-holyday"
 	dateValue := date.Format("2006-01-02")
 	week := Weeks[date.Weekday()]
 	prefix := fmt.Sprintf("%s-%s-", contentType, week)
 	return &DailyItem{
 		Type:        contentType,
 		Prefix:      prefix,
-		Style:       cssClass,
 		Placeholder: placeholder,
 		DateValue:   dateValue,
 		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
@@ -149,14 +142,12 @@ func NewDailyItemJissekiHolyday(date time.Time) *DailyItem {
 func NewDailyItemYotei(date time.Time) *DailyItem {
 	contentType := ContentTypeYotei
 	placeholder := "予定を記入する"
-	cssClass := "yotei-item-heijitsu"
 	dateValue := date.Format("2006-01-02")
 	week := Weeks[date.Weekday()]
 	prefix := fmt.Sprintf("%s-%s-", contentType, week)
 	return &DailyItem{
 		Type:        contentType,
 		Prefix:      prefix,
-		Style:       cssClass,
 		Placeholder: placeholder,
 		DateValue:   dateValue,
 		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
@@ -168,14 +159,12 @@ func NewDailyItemYotei(date time.Time) *DailyItem {
 func NewDailyItemYoteiHolyday(date time.Time) *DailyItem {
 	contentType := ContentTypeYotei
 	placeholder := "予定を記入する"
-	cssClass := "yotei-item-holyday"
 	dateValue := date.Format("2006-01-02")
 	week := Weeks[date.Weekday()]
 	prefix := fmt.Sprintf("%s-%s-", contentType, week)
 	return &DailyItem{
 		Type:        contentType,
 		Prefix:      prefix,
-		Style:       cssClass,
 		Placeholder: placeholder,
 		DateValue:   dateValue,
 		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
@@ -232,7 +221,6 @@ func (item *DailyItem) CompleteOmitedParam() {
 	}
 	item.Placeholder = dailyItem.Placeholder
 	item.Prefix = dailyItem.Prefix
-	item.Style = dailyItem.Style
 	item.DispDate = dailyItem.DispDate
 }
 
@@ -292,61 +280,4 @@ func (data *ReportData) SetParam(tp ContentType, week string, suffix string, val
 			data.Yotei.Sat.SetParam(suffix, value)
 		}
 	}
-}
-
-// //ExportReport 結果出力
-// func (data *ReportData) ExportReport() string {
-// 	return data.Tasks
-// }
-
-//SearchJSON 保存済みデータの検索
-func SearchJSON(startDate time.Time) string {
-	pattern := "./data/" + startDate.Format("2006-01-02") + "_*.json"
-	if files, err := filepath.Glob(pattern); err != nil {
-		fmt.Println("EnumTempFiles_Error :", err.Error())
-	} else {
-		if len(files) > 0 {
-			return files[0]
-		}
-	}
-	return ""
-}
-
-//SaveJSON JSONファイルに保存する
-func SaveJSON(jsonStruct *ReportData) error {
-	filePath := fmt.Sprintf("./data/%s_%s.json", jsonStruct.Jisseki.Mon.DateValue, jsonStruct.Yotei.Sun.DateValue)
-	fp, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0664)
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-	defer fp.Close()
-
-	e := json.NewEncoder(fp)
-	e.SetIndent("", "  ")
-	if err := e.Encode(jsonStruct); err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-	return nil
-}
-
-//RestoreJSON JSONから生成
-func RestoreJSON(jsonpath string) (ReportData, error) {
-	file, err := os.Open(jsonpath)
-	if err != nil {
-		msg := fmt.Sprintf("%s Open error : %v", jsonpath, err)
-		fmt.Println(msg)
-		return ReportData{}, err
-	}
-	defer file.Close()
-	d := json.NewDecoder(file)
-	d.DisallowUnknownFields() // エラーの場合 json: unknown field "JSONのフィールド名"
-	var jsonstruct ReportData
-	if err := d.Decode(&jsonstruct); err != nil && err != io.EOF {
-		msg := fmt.Sprintf("%s Decode error : %v", jsonpath, err)
-		fmt.Println(msg)
-		return ReportData{}, err
-	}
-	return jsonstruct, nil
 }

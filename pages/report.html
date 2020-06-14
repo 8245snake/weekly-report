@@ -1,16 +1,7 @@
 <!DOCTYPE html>
 <html lang="jp">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="../static/css/bootstrap.css">
-    <link rel="stylesheet" href="../static/css/bootstrap4-toggle.min.css">
-    <script type="text/javascript" src="../static/js/jquery-3.5.1.js"></script>
-    <script type="text/javascript" src="../static/js/bootstrap.bundle.js"></script>
-    <script type="text/javascript" src="../static/js/bootstrap4-toggle.min.js"></script>
-    <title>週報WEB</title>
-</head>
+<!-- headタグ -->
+{{template "head"}}
 
 <body>
     <script src="../static/js/wasm_exec.js"></script>
@@ -22,9 +13,7 @@
     </script>
 
     <!-- ヘッダ -->
-    <nav class="navbar fixed-top navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">週報システム</a>
-    </nav>
+    {{template "navber"}}
     <!-- 本体 -->
     <div class="jumbotron  px-lg-5">
         <div class="container-fluid px-lg-5">
@@ -32,7 +21,8 @@
                 <h2>タイトル</h2>
                 <input type="text" id="title" class="form-control mb-2" value="{{.Title}}">
             </div>
-            <textarea  class="form-control" rows="100">{{.Tasks}}</textarea> 
+            <h2>本文</h2>
+            <textarea  class="form-control" rows="26">{{template "report-text" .}}</textarea>
         </div>
     </div>
 </body>

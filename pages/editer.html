@@ -1,30 +1,11 @@
 <!DOCTYPE html>
 <html lang="jp">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="../static/css/bootstrap.css">
-    <link rel="stylesheet" href="../static/css/bootstrap4-toggle.min.css">
-    <script type="text/javascript" src="../static/js/jquery-3.5.1.js"></script>
-    <script type="text/javascript" src="../static/js/bootstrap.bundle.js"></script>
-    <script type="text/javascript" src="../static/js/bootstrap4-toggle.min.js"></script>
-    <title>週報WEB</title>
-</head>
+<!-- headタグ -->
+{{template "head"}}
 
 <body>
-    <script src="../static/js/wasm_exec.js"></script>
-    <script>
-        const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("static/wasm/main.wasm"), go.importObject).then((result) => {
-            go.run(result.instance);
-        });
-    </script>
-
     <!-- ヘッダ -->
-    <nav class="navbar fixed-top navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">週報システム</a>
-    </nav>
+    {{template "navber"}}
     <!-- 本体 -->
     <div class="jumbotron  px-lg-5">
         <div class="container-fluid px-lg-5">
@@ -86,12 +67,13 @@
         </div>
     </div>
     <nav class="navbar fixed-bottom navbar-dark bg-dark justify-content-end">
-        <button type="button" onclick="savePage();" class="btn btn-secondary" style="margin-right: 10px;">保存</button>
+        {{template "toast"}}
+        <button type="button" name="save" onclick="saveAndStayPage();" class="btn btn-secondary" style="margin-right: 10px;">保存</button>
         <form action="report">
             <!-- 開始日を格納しておく -->
             <input type="hidden" name="start" value="{{.Jisseki.Mon.DateValue}}">
             <!-- ページ遷移するためsubmit -->
-            <button type="submit"  onclick="savePage();" class="btn btn-primary">保存して週報作成</button>
+            <button type="submit" onclick="savePage();" class="btn btn-primary">保存して週報作成</button>
         </form>
     </nav>
 </body>

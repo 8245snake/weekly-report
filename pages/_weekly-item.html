@@ -1,0 +1,11 @@
+{{define "weekly-item"}}
+<a class="list-group-item list-group-item-action flex-column align-items-start" style="cursor: pointer;"
+    onclick="previewReport('{{.Start}}');">
+    <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">{{.Title}}</h5>
+        <small class="text-muted">最終更新：{{.LastUpdate}}</small>
+    </div>
+    <p class="m-2">実績：{{.JissekiRange}}</p>
+    <p class="m-2">予定：{{.YoteiRange}}</p>
+</a>
+{{end}}
