@@ -12,42 +12,32 @@ var tplIndex *template.Template
 var tplEditer *template.Template
 var tplReport *template.Template
 
+//TemplateParts テンプレート部品たち共通化
+var TemplateParts = []string{
+	"pages/_head.html",
+	"pages/_navber.html",
+	"pages/_daily-item.html",
+	"pages/_weekly-item.html",
+	"pages/_toast.html",
+	"pages/_report-text.html",
+	"pages/_modal-confirm.html",
+}
+
 func init() {
 	//ホーム画面テンプレート
-	if t, err := template.ParseFiles(
-		"pages/index.html",
-		"pages/_head.html",
-		"pages/_navber.html",
-		"pages/_weekly-item.html",
-		"pages/_toast.html",
-		"pages/_report-text.html",
-	); err == nil {
+	if t, err := template.ParseFiles(append([]string{"pages/index.html"}, TemplateParts...)...); err == nil {
 		tplIndex = t
 	} else {
 		log.Fatalf("template error: %v", err)
 	}
 	//編集画面テンプレート
-	if t, err := template.ParseFiles(
-		"pages/editer.html",
-		"pages/_head.html",
-		"pages/_navber.html",
-		"pages/_daily-item.html",
-		"pages/_toast.html",
-		"pages/_report-text.html",
-	); err == nil {
+	if t, err := template.ParseFiles(append([]string{"pages/editer.html"}, TemplateParts...)...); err == nil {
 		tplEditer = t
 	} else {
 		log.Fatalf("template error: %v", err)
 	}
 	//レポート画面テンプレート
-	if t, err := template.ParseFiles(
-		"pages/report.html",
-		"pages/_head.html",
-		"pages/_navber.html",
-		"pages/_daily-item.html",
-		"pages/_toast.html",
-		"pages/_report-text.html",
-	); err == nil {
+	if t, err := template.ParseFiles(append([]string{"pages/report.html"}, TemplateParts...)...); err == nil {
 		tplReport = t
 	} else {
 		log.Fatalf("template error: %v", err)
