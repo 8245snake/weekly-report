@@ -3,7 +3,7 @@
 <!-- headタグ -->
 {{template "head"}}
 
-<body>
+<body class="bg-light">
     <script src="../static/js/wasm_exec.js"></script>
     <script>
         const go = new Go();
@@ -15,16 +15,27 @@
     <!-- ヘッダ -->
     {{template "navber"}}
     <!-- 本体 -->
-    <div class="jumbotron  px-lg-5">
-        <div class="container-fluid px-lg-5">
+    <div class="jumbotron px-lg-5 bg-transparent">
+        <div class="container-fluid px-lg-5 full-height">
             <div class="w-50 mb-3">
                 <h2>タイトル</h2>
                 <input type="text" id="title" class="form-control mb-2" value="{{.Title}}">
             </div>
             <h2>本文</h2>
-            <textarea  class="form-control" rows="26">{{template "report-text" .}}</textarea>
+            <textarea  class="form-control h-100" >{{template "report-text" .}}</textarea>
         </div>
     </div>
+
+    <style>
+        .full-height {
+            height: 70vh;
+        }
+
+        .aqua {
+            background-color: aqua;
+        }
+
+    </style>
 </body>
 
 </html>

@@ -50,6 +50,10 @@
                                     日程に紐付かない予定・適宜やること
                                 </div>
                                 <textarea id="tasks" class="form-control" rows="10" placeholder="">{{.Tasks}}</textarea>
+                                <div class="d-inline-flex justify-content-end p-2 bg-light">
+                                    {{template "modal-confirm-button" "modal-tasks"}}
+                                    {{template "modal-confirm" "modal-tasks"}}
+                                </div>
                             </div>
                         </div>
                         <div class="col-lg-6">
@@ -57,8 +61,11 @@
                                 <div class="card-header d-inline-flex justify-content-between">
                                     近日中の予定
                                 </div>
-                                <textarea id="schedule" class="form-control" rows="10"
-                                    placeholder="">{{.Schedule}}</textarea>
+                                <textarea id="schedule" class="form-control" rows="10" placeholder="">{{.Schedule}}</textarea>
+                                <div class="d-inline-flex justify-content-end p-2 bg-light">
+                                    {{template "modal-confirm-button" "modal-schedule"}}
+                                    {{template "modal-confirm" "modal-schedule"}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -68,7 +75,8 @@
     </div>
     <nav class="navbar fixed-bottom navbar-dark bg-dark justify-content-end">
         {{template "toast"}}
-        <button type="button" name="save" onclick="saveAndStayPage();" class="btn btn-secondary" style="margin-right: 10px;">保存</button>
+        <button type="button" name="save" onclick="saveAndStayPage();" class="btn btn-secondary"
+            style="margin-right: 10px;">保存</button>
         <form action="report">
             <!-- 開始日を格納しておく -->
             <input type="hidden" name="start" value="{{.Jisseki.Mon.DateValue}}">

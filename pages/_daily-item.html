@@ -1,17 +1,22 @@
 {{define "daily-item"}}
-<div class="col-lg-{{if .IsHolyday}}2{{else}}4{{end}}" id="{{.Prefix}}container" >
+<div class="col-lg-{{if .IsHolyday}}2{{else}}4{{end}}" id="{{.Prefix}}container">
     <div class="card mb-3">
         <div class="card-header d-inline-flex justify-content-between bg-light align-items-center">
             <div id="{{.Prefix}}date-disp" class="{{if .IsHolyday}}h6{{else}}h3{{end}}">{{.DispDate}}</div>
             <input type="hidden" id="{{.Prefix}}date" name="{{.Prefix}}date" value="{{.DateValue}}">
-            <input type="checkbox" data-toggle="toggle" data-on="休日" data-off="勤務" id="{{.Prefix}}chk" 
-             data-onstyle="danger" data-offstyle="light" name="{{.Prefix}}chk" onchange="checkHolyday('{{.Prefix}}');"
-             {{if .IsHolyday}}checked{{ end }} >
+            <input type="checkbox" data-toggle="toggle" data-on="休日" data-off="勤務" id="{{.Prefix}}chk"
+                data-onstyle="danger" data-offstyle="light" name="{{.Prefix}}chk"
+                onchange="checkHolyday('{{.Prefix}}');" {{if .IsHolyday}}checked{{ end }}>
         </div>
         <div class="p-2">
-            <input type="text" id="{{.Prefix}}subtxt" name="{{.Prefix}}subtxt" class="form-control mb-2" placeholder="社内、出張、休日 など" value="{{.SubText}}">
-            <textarea id="{{.Prefix}}txt" name="{{.Prefix}}txt" class="form-control" rows="10" placeholder="{{.Placeholder}}">{{.Text}}</textarea> 
+            <input type="text" id="{{.Prefix}}subtxt" name="{{.Prefix}}subtxt" class="form-control mb-2"
+                value="{{.SubText}}" placeholder="社内、出張、休日 など">
+            <textarea id="{{.Prefix}}txt" name="{{.Prefix}}txt" class="form-control" rows="10"
+                placeholder="{{if eq .Type `jisseki`}}実績を入力する{{else}}予定を入力する{{end}}">{{.Text}}</textarea>
         </div>
+        <!-- <div class="d-inline-flex justify-content-end p-2">
+            <button type="button" name="copy" class="btn btn-info">先週のコピー</button>
+        </div> -->
     </div>
 </div>
 {{end}}
