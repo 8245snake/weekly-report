@@ -69,6 +69,9 @@ function copyFromLastWeek(id) {
                     text = data.schedule;
                     break;
             }
-            this.document.getElementById(mode).value = text;
+            if (text.trim() != '') {
+                this.document.getElementById(mode).value = text;
+            }
+            
         });
 }
