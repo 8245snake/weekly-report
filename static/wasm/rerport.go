@@ -9,20 +9,33 @@ import (
 type ContentType string
 
 const (
+	//DateValueFormat キー日付のフォーマット
+	DateValueFormat string = "2006-01-02"
 	//ContentTypeJisseki 実績
 	ContentTypeJisseki ContentType = "jisseki"
 	//ContentTypeYotei 予定
 	ContentTypeYotei ContentType = "yotei"
+	//PlaceholderJisseki プレースホルダ（実績）
+	PlaceholderJisseki string = "実績を入力する"
+	//PlaceholderYotei プレースホルダ（予定）
+	PlaceholderYotei string = "予定を入力する"
 )
+
+//ControlData ページ作成用データ
+type ControlData struct {
+	PlaceholderJisseki string
+	PlaceholderYotei   string
+}
 
 //ReportData 週報データ全て
 type ReportData struct {
-	Jisseki    WeeklyContents `json:"jisseki"`
-	Yotei      WeeklyContents `json:"yotei"`
-	Title      string         `json:"title"`
-	Tasks      string         `json:"task"`
-	Schedule   string         `json:"schedule"`
-	LastUpdate string         `json:"last_update"`
+	Jisseki     WeeklyContents `json:"jisseki"`
+	Yotei       WeeklyContents `json:"yotei"`
+	Title       string         `json:"title"`
+	Tasks       string         `json:"task"`
+	Schedule    string         `json:"schedule"`
+	LastUpdate  string         `json:"last_update"`
+	ControlData ControlData    `json:"-"`
 }
 
 //WeeklyContents 週毎のデータ
@@ -38,14 +51,13 @@ type WeeklyContents struct {
 
 //DailyItem 日毎のデータ
 type DailyItem struct {
-	Type        ContentType `json:"type"`
-	IsHolyday   bool        `json:"is_holyday"`
-	Prefix      string      `json:"prefix,omitempty"`
-	DateValue   string      `json:"date"`
-	DispDate    string      `json:"disp_date,omitempty"`
-	Placeholder string      `json:"placeholder,omitempty"`
-	Text        string      `json:"text"`
-	SubText     string      `json:"subtext"`
+	Type      ContentType `json:"type"`
+	IsHolyday bool        `json:"is_holyday"`
+	Prefix    string      `json:"prefix,omitempty"`
+	DateValue string      `json:"date"`
+	DispDate  string      `json:"disp_date,omitempty"`
+	Text      string      `json:"text"`
+	SubText   string      `json:"subtext"`
 }
 
 //Weeks 週の名前
@@ -56,7 +68,7 @@ var WeeksJP = [7]string{"(日)", "(月)", "(火)", "(水)", "(木)", "(金)", "(
 
 //NewReportData 初期化
 func NewReportData() ReportData {
-	return ReportData{
+	data := ReportData{
 		Jisseki: WeeklyContents{
 			Mon: &DailyItem{Type: ContentTypeJisseki},
 			Tue: &DailyItem{Type: ContentTypeJisseki},
@@ -76,100 +88,49 @@ func NewReportData() ReportData {
 			Sun: &DailyItem{Type: ContentTypeYotei},
 		},
 	}
+	data.ControlData.PlaceholderJisseki = PlaceholderJisseki
+	data.ControlData.PlaceholderYotei = PlaceholderYotei
+	return data
 }
 
 //NewReportDataToday startDateを起点として2週間分の週報データを作成する
 func NewReportDataToday(startDate time.Time) ReportData {
 	jisseki := WeeklyContents{
-		Mon: NewDailyItemJisseki(startDate),
-		Tue: NewDailyItemJisseki(startDate.AddDate(0, 0, 1)),
-		Wed: NewDailyItemJisseki(startDate.AddDate(0, 0, 2)),
-		Thu: NewDailyItemJisseki(startDate.AddDate(0, 0, 3)),
-		Fri: NewDailyItemJisseki(startDate.AddDate(0, 0, 4)),
-		Sat: NewDailyItemJissekiHolyday(startDate.AddDate(0, 0, 5)),
-		Sun: NewDailyItemJissekiHolyday(startDate.AddDate(0, 0, 6)),
+		Mon: NewDailyItem(ContentTypeJisseki, false, startDate),
+		Tue: NewDailyItem(ContentTypeJisseki, false, startDate.AddDate(0, 0, 1)),
+		Wed: NewDailyItem(ContentTypeJisseki, false, startDate.AddDate(0, 0, 2)),
+		Thu: NewDailyItem(ContentTypeJisseki, false, startDate.AddDate(0, 0, 3)),
+		Fri: NewDailyItem(ContentTypeJisseki, false, startDate.AddDate(0, 0, 4)),
+		Sat: NewDailyItem(ContentTypeJisseki, true, startDate.AddDate(0, 0, 5)),
+		Sun: NewDailyItem(ContentTypeJisseki, true, startDate.AddDate(0, 0, 6)),
 	}
 	yotei := WeeklyContents{
-		Mon: NewDailyItemYotei(startDate.AddDate(0, 0, 7)),
-		Tue: NewDailyItemYotei(startDate.AddDate(0, 0, 8)),
-		Wed: NewDailyItemYotei(startDate.AddDate(0, 0, 9)),
-		Thu: NewDailyItemYotei(startDate.AddDate(0, 0, 10)),
-		Fri: NewDailyItemYotei(startDate.AddDate(0, 0, 11)),
-		Sat: NewDailyItemYoteiHolyday(startDate.AddDate(0, 0, 12)),
-		Sun: NewDailyItemYoteiHolyday(startDate.AddDate(0, 0, 13)),
+		Mon: NewDailyItem(ContentTypeYotei, false, startDate.AddDate(0, 0, 7)),
+		Tue: NewDailyItem(ContentTypeYotei, false, startDate.AddDate(0, 0, 8)),
+		Wed: NewDailyItem(ContentTypeYotei, false, startDate.AddDate(0, 0, 9)),
+		Thu: NewDailyItem(ContentTypeYotei, false, startDate.AddDate(0, 0, 10)),
+		Fri: NewDailyItem(ContentTypeYotei, false, startDate.AddDate(0, 0, 11)),
+		Sat: NewDailyItem(ContentTypeYotei, true, startDate.AddDate(0, 0, 12)),
+		Sun: NewDailyItem(ContentTypeYotei, true, startDate.AddDate(0, 0, 13)),
 	}
 	layout := "2006/01/02"
 	title := fmt.Sprintf("【】%s～%s", startDate.Format(layout), startDate.AddDate(0, 0, 6).Format(layout))
-	return ReportData{Jisseki: jisseki, Yotei: yotei, Title: title}
+	data := NewReportData()
+	data.Jisseki = jisseki
+	data.Yotei = yotei
+	data.Title = title
+	return data
 }
 
-//NewDailyItemJisseki 平日の実績
-func NewDailyItemJisseki(date time.Time) *DailyItem {
-	contentType := ContentTypeJisseki
-	placeholder := "実績を記入する"
-	dateValue := date.Format("2006-01-02")
-	week := Weeks[date.Weekday()]
-	prefix := fmt.Sprintf("%s-%s-", contentType, week)
-
-	return &DailyItem{
-		Type:        contentType,
-		Prefix:      prefix,
-		Placeholder: placeholder,
-		DateValue:   dateValue,
-		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
-		IsHolyday:   false,
-	}
-}
-
-//NewDailyItemJissekiHolyday 休日の実績
-func NewDailyItemJissekiHolyday(date time.Time) *DailyItem {
-	contentType := ContentTypeJisseki
-	placeholder := "実績を記入する"
-	dateValue := date.Format("2006-01-02")
-	week := Weeks[date.Weekday()]
-	prefix := fmt.Sprintf("%s-%s-", contentType, week)
-	return &DailyItem{
-		Type:        contentType,
-		Prefix:      prefix,
-		Placeholder: placeholder,
-		DateValue:   dateValue,
-		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
-		IsHolyday:   true,
-	}
-}
-
-//NewDailyItemYotei 平日の予定
-func NewDailyItemYotei(date time.Time) *DailyItem {
-	contentType := ContentTypeYotei
-	placeholder := "予定を記入する"
-	dateValue := date.Format("2006-01-02")
-	week := Weeks[date.Weekday()]
-	prefix := fmt.Sprintf("%s-%s-", contentType, week)
-	return &DailyItem{
-		Type:        contentType,
-		Prefix:      prefix,
-		Placeholder: placeholder,
-		DateValue:   dateValue,
-		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
-		IsHolyday:   false,
-	}
-}
-
-//NewDailyItemYoteiHolyday 休日の実績
-func NewDailyItemYoteiHolyday(date time.Time) *DailyItem {
-	contentType := ContentTypeYotei
-	placeholder := "予定を記入する"
-	dateValue := date.Format("2006-01-02")
-	week := Weeks[date.Weekday()]
-	prefix := fmt.Sprintf("%s-%s-", contentType, week)
-	return &DailyItem{
-		Type:        contentType,
-		Prefix:      prefix,
-		Placeholder: placeholder,
-		DateValue:   dateValue,
-		DispDate:    date.Format("2006/01/02") + WeeksJP[date.Weekday()],
-		IsHolyday:   true,
-	}
+//NewDailyItem 初期化
+func NewDailyItem(contentType ContentType, isHolyday bool, date time.Time) *DailyItem {
+	data := &DailyItem{}
+	data.Type = contentType
+	data.DateValue = date.Format(DateValueFormat)
+	data.Prefix = fmt.Sprintf("%s-%s-", contentType, Weeks[date.Weekday()])
+	data.IsHolyday = isHolyday
+	data.DispDate = date.Format("2006/01/02") + WeeksJP[date.Weekday()]
+	return data
 }
 
 //SetParam データ代入
@@ -199,27 +160,18 @@ func (item *DailyItem) SetParam(suffix string, value string) {
 //CompleteOmitedParam 省略されたパラメータを復活
 func (item *DailyItem) CompleteOmitedParam() {
 
-	date, err := time.Parse("2006-01-02", item.DateValue)
+	date, err := time.Parse(DateValueFormat, item.DateValue)
 	if err != nil {
 		return
 	}
 	var dailyItem *DailyItem
 	if date.Weekday() == 0 || date.Weekday() == 6 {
-		switch item.Type {
-		case ContentTypeJisseki:
-			dailyItem = NewDailyItemJissekiHolyday(date)
-		case ContentTypeYotei:
-			dailyItem = NewDailyItemYoteiHolyday(date)
-		}
+		// 休日
+		dailyItem = NewDailyItem(item.Type, true, date)
 	} else {
-		switch item.Type {
-		case ContentTypeJisseki:
-			dailyItem = NewDailyItemJisseki(date)
-		case ContentTypeYotei:
-			dailyItem = NewDailyItemYotei(date)
-		}
+		// 平日
+		dailyItem = NewDailyItem(item.Type, false, date)
 	}
-	item.Placeholder = dailyItem.Placeholder
 	item.Prefix = dailyItem.Prefix
 	item.DispDate = dailyItem.DispDate
 }
@@ -240,6 +192,8 @@ func (data *ReportData) CompleteOmitedParam() {
 	data.Yotei.Thu.CompleteOmitedParam()
 	data.Yotei.Fri.CompleteOmitedParam()
 	data.Yotei.Sat.CompleteOmitedParam()
+	data.ControlData.PlaceholderJisseki = PlaceholderJisseki
+	data.ControlData.PlaceholderYotei = PlaceholderYotei
 }
 
 //SetParam データ代入
